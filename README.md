@@ -1,4 +1,3 @@
-```markdown
 # Movies REST API
 
 ## Overview
@@ -69,9 +68,9 @@ npm install
 ```
 2. Start the API
 ```bash
-`npm run dev`
+npm run dev
 ```
 
 3. To open the Swagger UI:
+```text
 https://localhost:3000
-```
