@@ -22,7 +22,7 @@ var peopleRouter = require("./routes/people");
 
 var app = express();
 
-// view engine setup
+// View engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
 
@@ -55,7 +55,6 @@ app.get("/knex", function (req, res, next) {
       throw err;
     });
 
-  res.send("Version Lo12334");
 });
 
 

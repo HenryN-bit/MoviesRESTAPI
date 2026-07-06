@@ -1,9 +1,9 @@
 # Movies REST API
 
 ## Overview
-This REST API was developed as part of the CAB230 Web Computing unit at Queensland University of Technology (QUT). It provides endpoints for retrieving movie and people information, user authentication and access to protected resources.
+The Movies REST API academic project was developed as part of the CAB230 Web Computing unit at Queensland University of Technology (QUT). It provides endpoints for retrieving movie and people information, user authentication and access to protected resources.
 
-This Express REST API provides the backend services for the Movies React Web Application. It is responsible for handling movie and people data, user authentication and communication with a MySQL database through RESTful API endpoints.
+This REST API provides the backend services for the Movies React Web Application. It is responsible for handling movie and people data, user authentication and communication with a MySQL database through RESTful API endpoints.
 
 The React Movie Web Application communicates with this API to retrieve movie information, authenticate users using JSON Web Tokens (JWT) and access protected endpoints.
 
@@ -31,29 +31,33 @@ The React Movie Web Application communicates with this API to retrieve movie inf
 The API connects to a local MySQL database restored using the provided `dump.sql` file.
 
 ## Running the Full Application
-This API is designed to work with the Movies React Web Application, which is maintained in a separate repository.
 
-To run the full application:
-1. Clone both repositories (or download them as zip files).
-2. Install the dependencies for each project.
+This API is designed to work with the **Movies React Web Application**, which is maintained in the **MoviesReactWebApplication** repository.
 
-**Movies REST API dependencies**:
+To run the full application: 
+
+1. Clone both repositories **or** download them as zip files.
+
+2. Open a terminal (or Command Prompt) and install dependencies for the **Movies REST API** in the REST API directory:
+
 ```bash
 npm install
 ```
 
-**Movies React Web Application dependencies**:
+3. Open a second terminal (or Command Prompt) and install dependencies for the **Movies React Web Application** in the React Web Application directory:
+
 ```bash
 npm install
 ```
 
-3. Start the Movies REST API.
+4. Start the **Movies REST API** in the Movies REST API directory in terminal/Command Prompt:
 
 ```bash
 npm run dev
 ```
 
-4. In a separate terminal, navigate to the Movies React Web Application directory and start the frontend.
+5. Navigate to the **Movies React Web Application directory** and start the frontend in the terminal/Command Prompt.
+
 ```bash
 npm run dev
 ```
