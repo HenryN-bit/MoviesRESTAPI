@@ -27,14 +27,20 @@ router.post('/register', function (req, res, next) {
        res.status(400).json({ success: false, message: "User exists" });
     } else {
 
+   // Hashes the user's password before storing it in the database
    const saltRounds = 10;
    const emailHash = {
     email: email,
     hash: bcrypt.hashSync(password, saltRounds),
   };
 
+    // Creates a new user account in the database
     db("users").insert(emailHash)
-      .then(() => res.status(201).json({ success: true, message: "User created" }))
+      .then(() => res.status(201).json({ 
+        success: true, 
+        message: "User created" 
+        })
+      )
       .catch(() =>    
         res.status(500).json({
           success: false,
@@ -49,7 +55,7 @@ router.post('/register', function (req, res, next) {
 router.post("/login", async (req, res, next) => {
   
   const email = req.body.email;
-   const password = req.body.password;
+  const password = req.body.password;
  
    //  Checks if the email or password fields are empty
    if (!email || !password) {
@@ -61,40 +67,56 @@ router.post("/login", async (req, res, next) => {
    }
  try {
   
+    // Checks whether the email address is already registered
     users = await db("users").select("*").where("email", "=", email);
     let user = users[0];
 
-    // Checks if a invalid user is input into the login field
+    // Checks whether the user account exists
     if (!user) {
-        res.status(401).json({ success: false, message: "User does not exist" });
+        res.status(401).json({ 
+          success: false, 
+          message: "User does not exist" 
+        });
      } else {
   
-   const match = await bcrypt.compare(password, user.hash);
- 
-   if (match) {
-    const bt = parseInt(process.env.bearerExpiresInSeconds);
-    const rt = parseInt(process.env.refreshExpiresInSeconds);
-           const refreshToken = jwt.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: rt });
-           const bearerToken = jwt.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: bt });
- 
-           return res.status(200).json({
-             bearerToken: {
-               token: bearerToken,
-               token_type: "Bearer",
-               expires_in: bt
-             },
-             refreshToken: {
-               token: refreshToken,
-               token_type: "Refresh",
-               expires_in: rt
-             }
-           });
-         } else {
-           return res.status(401).json({
-             error: true,
-             message: "Incorrect email or password"
-           });
-         }
+          // Verifies the supplied password against the stored password hash
+          const match = await bcrypt.compare(password, user.hash);
+        
+          if (match) {
+            // Generates JWT bearer and refresh tokens for the authenticated user
+            const bt = parseInt(process.env.bearerExpiresInSeconds);
+            const rt = parseInt(process.env.refreshExpiresInSeconds);
+            
+            const refreshToken = jwt.sign(
+              { email: user.email },
+              process.env.JWT_SECRET,
+              { expiresIn: rt });
+
+            const bearerToken = jwt.sign(
+              { email: user.email },
+              process.env.JWT_SECRET,
+              { expiresIn: bt });
+        
+            // Returns the generated authenticated tokens
+            return res.status(200).json({
+                    bearerToken: {
+                      token: bearerToken,
+                      token_type: "Bearer",
+                      expires_in: bt
+                    },
+                    refreshToken: {
+                      token: refreshToken,
+                      token_type: "Refresh",
+                      expires_in: rt
+                    }
+                  });
+          } else {
+              // Returns an error when the supplied password is incorrect
+              return res.status(401).json({
+                    error: true,
+                    message: "Incorrect email or password"
+              });
+          }
        
        
        }
@@ -106,7 +128,7 @@ router.post("/login", async (req, res, next) => {
          })
        }});
 
-// Checks if input date is not in YYYY-MM-DD format
+// Validates that the supplied date is a real past date in YYYY-MM-DD format
 const isValidDate = (dateOfBirth) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dob)) {
     return false;
@@ -125,19 +147,22 @@ const isValidDate = (dateOfBirth) => {
   );
 };
 
-// User profile update endpoint to only authorised users
+// Updates the authenticated user's profile information
 router.post("/update", authorization, async function(req, res) {
   const { userEmail, dateofBirth } = req.body;
   const authorizedEmail = req.user.email;
 
+  // Checks if the email or date of birth fields are empty
   if (!userEmail || !dateofBirth) {
     return res.status(400).json({ error: true, message: 'Missing required fields' });
   }
 
+  // Ensures the authenticated user can only update their own profile
   if (userEmail !== authorizedEmail) {
     return res.status(403).json({ error: true, message: "Unauthorized to update profile" });
   }
 
+  // Validates the supplied date of birth before updating the profile
   if (!isValidDate(dateofBirth)) {
     return res.status(400).json({
       error: true,
@@ -146,6 +171,7 @@ router.post("/update", authorization, async function(req, res) {
   }
 
   try {
+    // Updates the user's date of birth in the database
     const rows = await db("users")
       .where("email", "=", userEmail)
       .update({ dob: dateofBirth });
@@ -178,14 +204,14 @@ router.get("/:email/profile", authorization, async function (req, res) {
       });
     }
 
-    // Retrieves user details
+    // Builds the public profile returned for all users
     const userProfile = {
       email: user.email,
       firstName: user.firstName || null,
       lastName: user.lastName || null
     };
 
-    // If requester is the same as the user
+    // Includes private profile fields when users view their own profile
     if (requesterEmail === user.email) {
       userProfile.dob = user.dob || null;
       userProfile.address = user.address || null;
@@ -200,7 +226,7 @@ router.get("/:email/profile", authorization, async function (req, res) {
   }
 });
 
-// Put User Email Profile Endpoint
+// Updates an authenticated user's profile
 router.put("/:email/profile", authorization, async function (req, res) {
   const { requestedEmail } = req.params;
   const { requesterEmail } = req.user;
@@ -211,7 +237,7 @@ router.put("/:email/profile", authorization, async function (req, res) {
 
   const { firstName, lastName, dateofBirth, address } = req.body;
 
-  // Checks if the first name, last name, date of birth or the address is empty
+  // Ensures all required profile fields are provided
   if (!firstName || !lastName || !dateofBirth || !address) {
     return res.status(400).json({
       error: true,
@@ -219,7 +245,7 @@ router.put("/:email/profile", authorization, async function (req, res) {
     });
   }
 
-  // Checks if either the first name, last name or the address is not a string
+  // Validates the profile fields are strings
   if ( typeof firstName !== "string" || typeof lastName !== "string" || typeof address !== "string"
   ) {
     return res.status(400).json({
@@ -228,7 +254,7 @@ router.put("/:email/profile", authorization, async function (req, res) {
     });
   }
 
-  // Validate date format and realness
+  // Validates the date format (YYYY-MM-DD)
   const regexYYYY_MM_DD = /^\d{4}-\d{2}-\d{2}$/;
   if (!regexYYYY_MM_DD.test(dateofBirth)) {
     return res.status(400).json({
@@ -237,7 +263,7 @@ router.put("/:email/profile", authorization, async function (req, res) {
     });
   }
 
-  // Checks if the date of birth is in a real date format of YYYY-MM-DD
+  // Ensures the supplied date is a valid calender date
   const [year, month, day] = dateofBirth.split("-").map(Number);
   const parsedDate = new Date(dateofBirth);
   if (parsedDate.getFullYear() !== year || parsedDate.getMonth() + 1 !== month || parsedDate.getDate() !== day
@@ -249,7 +275,7 @@ router.put("/:email/profile", authorization, async function (req, res) {
   }
 
   try {
-    // Searches for the user's email address
+    // Retrieves the user's existing profile
     const user = await db("users")
       .where("email", "=", requestedEmail)
       .first();
@@ -259,7 +285,7 @@ router.put("/:email/profile", authorization, async function (req, res) {
       return res.status(404).json({ error: true, message: "User not found" });
     }
 
-    // Searches for the user's email and updates their details
+    // Updates the user's profile information
     await db("users")
       .where("email", "=", requestedEmail)
       .update({ firstName, lastName, dob: dateofBirth, address });
