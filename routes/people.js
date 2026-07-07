@@ -4,6 +4,7 @@ var router = express.Router();
 
 const db = require("../knexfile.js");
 
+// Converts the stored characters field into an array for the API response
 function parseCharacters(characters) {
 
   if (!characters || characters === "\\N") {
@@ -32,11 +33,13 @@ router.get("/:id", authorization, async function (req, res) {
   }
 
   try {
+    // Retrieves the selected person from the database
     const person = await db("names")
       .select("*")
       .where("nconst", personID)
       .first();
 
+    // Returns an error if the requested person does not exist
     if (!person) {
       return res.status(404).json({
         error: true,
@@ -48,12 +51,15 @@ router.get("/:id", authorization, async function (req, res) {
       .select("*")
       .where("nconst", personID);
 
+    // Extracts the movie identifiers linked to the person's roles
     const tconsts = roles.map(role => role.tconst);
 
+    // Retrieves movie information for each role
     const movies = await db("basics")
       .select("tconst", "primaryTitle", "imdbRating")
       .whereIn("tconst", tconsts);
 
+    // Creates a lookup table for movie titles and IMDb ratings
     const movieMap = {};
     movies.forEach(movie => {
       movieMap[movie.tconst] = {
@@ -62,6 +68,7 @@ router.get("/:id", authorization, async function (req, res) {
       };
     });
     
+    // Combines role and movie information into the required response format
     const formattedRoles = roles.map(role => ({
       movieId: role.tconst,
       movieName: movieMap[role.tconst]?.title || null,
@@ -70,6 +77,7 @@ router.get("/:id", authorization, async function (req, res) {
       characters: parseCharacters(role.characters)
     }));
 
+    // Returns the formatted person profile and associated roles
     return res.status(200).json({
       name: person.primaryName,
       birthYear: person.birthYear,
