@@ -3,7 +3,7 @@ var router = express.Router();
 
 const db = require("../knexfile.js");
 
-// Movies search endpoint
+// Searches and filters movies with pagination support
 router.get("/search", async function (req, res, next) {
   const pageNumber = parseInt(req.query.page);
   const perPage = 100;
@@ -36,27 +36,23 @@ router.get("/search", async function (req, res, next) {
   try {
     let query = db.from("basics");
 
-    // Checks if a year was selected
+    // Applies optional filters from the query parameters
     if (year) {
       query = query.where("year", "=", year);
     }
 
-    // Checks the movie's id
     if (id) {
       query = query.where("id", "=", id);
     }
 
-    // Checks the movie's title
     if (title) {
       query = query.where("primaryTitle", "like", `%${title}%`);
     }
 
-    // Checks the movie's rottentomatoes rating
     if (rottentomatoesRating) {
       query = query.where("rottentomatoesRating", "=", rottentomatoesRating);
     }
 
-    // Checks the movie's metacritic rating
     if (metaCriticRate) {
       query = query.where("metacriticRating", "=", metaCriticRate);
     }
@@ -70,7 +66,7 @@ router.get("/search", async function (req, res, next) {
 
     const rows = await query.select("*").limit(perPage).offset(offset);
 
-    // Maps the movie data into the table
+    // Formats database rows into the API response structure
     const mapped = rows.map(movie => ({
       imdbID: movie.tconst,
       title: movie.primaryTitle,
@@ -104,11 +100,11 @@ router.get("/search", async function (req, res, next) {
   }
 });
 
-// Retrieve selected movie data ID endpoint
+// Retrieve detailed information for a selected movie
 router.get("/data/:id", async function (req, res, next) {
   const movieID = req.params.id;
 
-  // If the movieID is invalid
+  // Validates the IMDb movie identifier format
   if (!/^tt\d+$/.test(movieID)) {
     return res.status(404).json({
       error: true,
@@ -129,7 +125,7 @@ router.get("/data/:id", async function (req, res, next) {
       .where("tconst", movieID)
       .first();
 
-    // Checks if the searched movie is invalid
+    // Returns an error if the requested movie does not exist
     if (!movie) {
       return res.status(404).json({
         error: true,
@@ -137,6 +133,7 @@ router.get("/data/:id", async function (req, res, next) {
       });
     }
 
+    // Formats genres and ratings for the movie details response
     const genres = movie.genres ? movie.genres.split(",").map((genre) => genre.trim()) : [];
 
     const ratings = [];
@@ -172,7 +169,7 @@ router.get("/data/:id", async function (req, res, next) {
         : []
     }));
 
-    // Movie details response in json format
+    // Builds the movie details response returned to the frontend
     const movieResponse = {
       imdbID: movie.tconst,
       title: movie.primaryTitle,
