@@ -7,6 +7,10 @@ It is the backend component of the Movies React Web Application developed using 
 
 It communicates with the companion Movies React Web Application, which is maintained in the **MoviesReactWebApplication** repository.
 
+## Note
+
+This API runs over HTTPS using a self-signed certificate for local development. When accessing https://localhost:3000 for the first time, your browser will show a security warning (e.g. "Your connection is not private"). This is expected, click "Advanced" and then "Proceed to localhost (unsafe)" (wording varies by browser) to continue. This warning only appears because the certificate isn't issued by a public certificate authority; it does not indicate any actual security issue on your local machine.
+
 ## Technologies Used
 
 - Node.js
@@ -27,8 +31,21 @@ It communicates with the companion Movies React Web Application, which is mainta
 - JWT authentication
 - Protected API endpoints
 
+## Setup
+Copy .env.example to .env
+Generate a JWT secret and add it to .env
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+Copy the output into the JWT_SECRET value in your .env file
+Fill in your own MySQL database credentials in .env
+Install dependencies and run the server:
+
 ## Database
 The API connects to a local MySQL database restored using the provided `dump.sql` file.
+Run this after creating an empty movies database in MySQL and before starting the server. 
+
+```text
+`mysql -u root -p movies < dump.sql`
+```
 
 ## Running the Full Application
 
