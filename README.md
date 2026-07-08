@@ -32,48 +32,45 @@ This API runs over HTTPS using a self-signed certificate for local development. 
 - Protected API endpoints
 
 ## Setup
-Copy .env.example to .env
-Generate a JWT secret and add it to .env
+
+On the Movies REST API:
+
+1. Copy .env.example to .env
+2. Generate a JWT secret through the terminal/Command Prompt and add it to .env
+```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-Copy the output into the JWT_SECRET value in your .env file
-Fill in your own MySQL database credentials in .env
-Install dependencies and run the server:
+```
+3. Copy the output into the JWT_SECRET value in your .env file
+4. Fill in your own MySQL database credentials in .env (DB_USER, DB_PASSWORD)
+5. Install dependencies:
+
+```text
+npm install
+```
 
 ## Database
 The API connects to a local MySQL database restored using the provided `dump.sql` file.
 Run this after creating an empty movies database in MySQL and before starting the server. 
 
 ```text
-`mysql -u root -p movies < dump.sql`
+mysql -u root -p movies < dump.sql
 ```
 
 ## Running the Full Application
 
 This API is designed to work with the **Movies React Web Application**, which is maintained in the **MoviesReactWebApplication** repository.
 
-To run the full application: 
+Clone both repositories **or** download them as zip files.
 
-1. Clone both repositories **or** download them as zip files.
+After completing Setup and Database above: 
 
-2. Open a terminal (or Command Prompt) and install dependencies for the **Movies REST API** in the REST API directory:
-
-```bash
-npm install
-```
-
-3. Open a second terminal (or Command Prompt) and install dependencies for the **Movies React Web Application** in the React Web Application directory:
-
-```bash
-npm install
-```
-
-4. Start the **Movies REST API** in the Movies REST API directory in terminal/Command Prompt:
+1. Start the **Movies REST API** in the Movies REST API directory in terminal/Command Prompt:
 
 ```bash
 npm run dev
 ```
 
-5. Navigate to the **Movies React Web Application directory** and start the frontend in the terminal/Command Prompt.
+2. Navigate to the **Movies React Web Application directory** and start the frontend in the terminal/Command Prompt.
 
 ```bash
 npm run dev
