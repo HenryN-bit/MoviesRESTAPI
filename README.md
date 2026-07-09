@@ -11,7 +11,7 @@ It communicates with the companion Movies React Web Application, which is mainta
 
 This API runs over HTTPS using a self-signed certificate for local development. When accessing https://localhost:3000 for the first time, your browser will show a security warning (e.g. "Your connection is not private"). This is expected, click "Advanced" and then "Proceed to localhost (unsafe)" (wording varies by browser) to continue. This warning only appears because the certificate isn't issued by a public certificate authority; it does not indicate any actual security issue on your local machine.
 
-## Technologies Used
+## Technologies
 
 - Node.js
 - Express
@@ -31,7 +31,7 @@ This API runs over HTTPS using a self-signed certificate for local development. 
 - JWT authentication
 - Protected API endpoints
 
-## Setup
+## .env Setup
 
 On the Movies REST API:
 
@@ -44,17 +44,25 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 4. Fill in your own MySQL database credentials in .env (DB_USER, DB_PASSWORD)
 5. Install dependencies:
 
-```text
+```bash
 npm install
 ```
 
-## Database
-The API connects to a local MySQL database restored using the provided `dump.sql` file.
-Run this after creating an empty movies database in MySQL and before starting the server. 
+### Database Configuration
 
-```text
-mysql -u root -p movies < dump.sql
+The Movies REST API uses a local MySQL database.
+
+Before running the application:
+
+1. Create a MySQL database named `movies`.
+
+2. Import the provided `dump.sql` file into the database.
+
+```bash
+mysql -u <your_username> -p movies < dump.sql
 ```
+
+3. Update the MySQL connection details in `knexfile.js` to match your local MySQL configuration (host, username, password and database name).
 
 ## Running the Full Application
 
@@ -62,7 +70,7 @@ This API is designed to work with the **Movies React Web Application**, which is
 
 Clone both repositories **or** download them as zip files.
 
-After completing Setup and Database above: 
+After completing the setup above: 
 
 1. Start the **Movies REST API** in the Movies REST API directory in terminal/Command Prompt:
 
